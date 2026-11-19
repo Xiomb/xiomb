@@ -7,7 +7,7 @@ import {Whip} from "./Whip.js";
 import {encodeData, decodeData} from "./Data.js";
 
 const HOOKS = ['auth', 'publish', 'play', 'rtsp', 'resume'];
-const DEFAULT_CORE_ADDRESS = 'c.xiomb.com:443';
+const DEFAULT_CORE_ADDRESS = 'eu-test.xiomb.com:443';
 
 export class XiombProject extends ObjectExtend {
     #settings;

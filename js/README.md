@@ -1,10 +1,10 @@
 # xiomb
 
-Server and browser SDK for [xiomb](https://xiomb.com), a cloud audio/video streaming server with WebRTC, HLS, RTSP, RTMP and VOD.
+Server and browser SDK for [xiomb](https://xiomb.com), a cloud audio/video streaming server with WebRTC, HLS, RTSP, RTSPS, RTMP and RTMPS.
 
 - **Live in the browser**: publish a camera and microphone over WebRTC, watch over WebRTC (sub-second latency) or HLS.
-- **Any source**: IP cameras and encoders publish over RTSP or RTMP (OBS, ffmpeg); the cloud can also pull an RTSP/HTTP source by itself.
-- **Recording and snapshots**: record a live stream to a file (VOD) and take JPEG snapshots on demand.
+- **Any source**: IP cameras and encoders publish over RTSP, RTSPS, RTMP or RTMPS (OBS, ffmpeg); the cloud can also pull an RTSP/HTTP source by itself.
+- **Recording and snapshots**: record a live stream to a file and take JPEG snapshots on demand.
 - **Your rules**: every connection, publish and play goes through hooks in your own server, so access control stays in your code.
 - **Survives failures**: the SDK reconnects, resumes sessions and restarts streams by itself; the server follows the project when it moves to another region.
 
@@ -21,7 +21,7 @@ Server and browser SDK for [xiomb](https://xiomb.com), a cloud audio/video strea
   - [Client](#client)
   - [MediaObject](#mediaobject)
   - [Stream info](#stream-info)
-- [Links: HLS, RTSP, RTMP](#links-hls-rtsp-rtmp)
+- [Links: HLS, RTSP, RTSPS, RTMP, RTMPS](#links-hls-rtsp-rtsps-rtmp-rtmps)
 - [OBS over WebRTC (WHIP)](#obs-over-webrtc-whip)
 - [Browser SDK](#browser-sdk)
   - [Install](#install)
@@ -32,6 +32,7 @@ Server and browser SDK for [xiomb](https://xiomb.com), a cloud audio/video strea
   - [Reconnect and restart](#reconnect-and-restart)
 - [Errors](#errors)
 - [Browser support](#browser-support)
+- [Demo](#demo)
 - [License](#license)
 
 ## How it works
@@ -40,7 +41,7 @@ Server and browser SDK for [xiomb](https://xiomb.com), a cloud audio/video strea
  Browser (SDK)  ── WebSocket ──>  Your project server (this package)  ── gRPC ──>  xiomb cloud
        │                                    │                                        │
        └──────────── WebRTC / HLS media ────┼────────────────────────────────────────┘
- Cameras, OBS ─────────── RTSP / RTMP ──────┴──── hook "rtsp" asks your server ──────┘
+ Cameras, OBS ────── RTSP(S) / RTMP(S) ─────┴──── hook "rtsp" asks your server ──────┘
 ```
 
 1. You create a project at [xiomb.com/projects](https://xiomb.com/projects) and get a **project ID** and a **secret key**.
@@ -134,7 +135,7 @@ import {XiombProject, ProjectError} from 'xiomb';
 | `core.projectID` | — | Project ID from [xiomb.com/projects](https://xiomb.com/projects). Required. |
 | `core.secret` | — | Project key. Required. |
 | `core.portalURL` | — | `https://xiomb.com`. The server asks the portal which cloud region serves the project and follows it when the project moves. |
-| `core.address` | `c.xiomb.com:443` | Fixed cloud address `host:port` instead of `portalURL`, for self-hosted setups. Used when neither `portalURL` nor `address` is set. |
+| `core.address` | `eu-test.xiomb.com:443` | Fixed cloud address `host:port` instead of `portalURL`, for self-hosted setups. Used when neither `portalURL` nor `address` is set. |
 | `core.tls` | `true` with the default address, otherwise `false` | `true` for TLS to the cloud, or `{ca: Buffer}` with a custom CA certificate. |
 | `core.failoverTimeout` | `20000` | While the cloud is unreachable for less than this (ms), reconnect to the same region; after it, ask the portal again. |
 | `core.requestTimeout` | `15000` | Timeout of a single request to the cloud, ms. |
@@ -203,7 +204,7 @@ project.use('publish', async (client, {name, custom}) => {
 
 #### Connections by link: the same `auth`, `publish`, `play`
 
-An HLS, RTSP or RTMP client (camera, OBS, ffmpeg, a media player, a TV) goes through the same hooks as the browser (see [Links](#links-hls-rtsp-rtmp)):
+An HLS, RTSP or RTMP client (camera, OBS, ffmpeg, a media player, a TV) goes through the same hooks as the browser (see [Links](#links-hls-rtsp-rtsps-rtmp-rtmps)):
 
 - `auth(socket)` — `socket` holds the link parameters instead of the socket query: `socket.getQueryVal('auth_login')`, `getQuery()`, `getIP()`, `getUserAgent()` (`User-Agent` of the player, `flashVer` of an RTMP client; for the browser socket read `socket.getReqHeaders()['user-agent']`, which works for links too); login and password from the link are `auth_login` and `auth_password`. The returned `ID` becomes the user ID of the media, `data` its default data, e.g. `{ID, data: {ip: socket.getIP(), device: socket.getReqHeaders()['user-agent']}}`.
 - `publish(client, {name, transport})` / `play(client, {name, transport})` — `client.getUser()`, `getUserID()`, `getIP()`, `getTransport()` (`hls`, `rtsp`, `rtmp`). The stream name is fixed by the link: a hook that returns another name refuses.
@@ -276,7 +277,7 @@ client.on('message', (event, data) => console.log(event, data));
 | `closeMedia(ID, reason?)` | Close a media. `reason` — a `ProjectError` or a string; the browser receives it. |
 | `listStreams()` | `Promise<StreamInfo[]>` — streams being published now, with tracks, viewers, recordings. See [stream info](#stream-info). |
 | `killStream(name, reason?)` | Stop a published stream and all its viewers. |
-| `getHlsURL(name, options?)`, `getRtspURL`, `getRtspsURL`, `getRtmpURL`, `getRtmpsURL` | `string` — a link for a player, camera or OBS: `<cloud entry>/<projectID>/<name>?auth_login=…&auth_password=…&…`. `options`: `{login, password, ...params}`; `login` and `password` become `auth_login` and `auth_password`, the other fields go to the `auth` hook as link parameters. The entries come from the cloud on connect; throws `SERVICE_UNAVAILABLE` before that and `LINK_NOT_SET` if the cloud has no such entry. See [Links](#links-hls-rtsp-rtmp). |
+| `getHlsURL(name, options?)`, `getRtspURL`, `getRtspsURL`, `getRtmpURL`, `getRtmpsURL` | `string` — a link for a player, camera or OBS: `<cloud entry>/<projectID>/<name>?auth_login=…&auth_password=…&…`. `options`: `{login, password, ...params}`; `login` and `password` become `auth_login` and `auth_password`, the other fields go to the `auth` hook as link parameters. The entries come from the cloud on connect; throws `SERVICE_UNAVAILABLE` before that and `LINK_NOT_SET` if the cloud has no such entry. See [Links](#links-hls-rtsp-rtsps-rtmp-rtmps). |
 | `getTransportURL(transport, name, options?)` | The same with `transport`: `hls`, `rtsp`, `rtsps`, `rtmp` or `rtmps`. |
 | `snapshot(name)` | `Promise<string>` — take a JPEG of a live stream, resolves with its URL. |
 | `setRecording(name, enabled)` | Start or stop recording a live stream. File URLs appear in `recordingUrls` of the stream info. |
@@ -367,7 +368,7 @@ Events: `status` (`mediaObject`) on status change, `stat` (`stat`) on new statis
     createdAt: 1767225600000,
     tracks: [{kind: 'video', codec: 'H264', width: 1280, height: 720, fps: 30, bitrate: 2400000, live: true}],
     recording: false,
-    recordingUrls: [],           // finished and current recording files (VOD)
+    recordingUrls: [],           // finished and current recording files
     snapshotUrl: '',             // last snapshot
     viewers: 3,
     viewerList: [{ID, userID, data, transport, status, createdAt}],
@@ -376,7 +377,7 @@ Events: `status` (`mediaObject`) on status change, `stat` (`stat`) on new statis
 
 Viewers in another codec than the source get it transcoded by the cloud automatically.
 
-## Links: HLS, RTSP, RTMP
+## Links: HLS, RTSP, RTSPS, RTMP, RTMPS
 
 Players, cameras and encoders connect by a link; every link goes through your `auth` hook and then `publish` or `play`, the same as the browser.
 
@@ -682,6 +683,46 @@ Errors are objects with `name` and `message`. In the SDK they are `xiombError` (
 - **Publish**: browsers with WebRTC and `getUserMedia` (Chrome, Edge, Firefox, Safari 11+, mobile Chrome and Safari), on `https://`.
 - **Play over WebRTC**: the same browsers.
 - **Play over HLS**: anything with Media Source Extensions and hls.js, or native HLS (Safari, iOS, Android); the ES5 build `xiomb.min.js` covers old browsers and TV/embedded engines.
+
+## Demo
+
+A full demo page with its project server is in the repository, [`js/demo/`](https://github.com/Xiomb/xiomb/tree/master/js/demo); it is not part of the npm package. From a clone of the repository:
+
+```bash
+cp js/demo/.env.example js/demo/.env   # fill in the values below
+make demo                              # npm ci, build of the browser SDK, a self-signed certificate for localhost, start
+```
+
+Or by hand from `js/`:
+
+```bash
+npm install
+npm run build
+npm run demo:cert   # self-signed certificate in demo/ssl/ for localhost, once
+npm run demo
+```
+
+| Variable | Value |
+|---|---|
+| `DEMO_CORE`, `DEMO_CORE_TLS` | Address of the xiomb cloud, e.g. `eu-test.xiomb.com` and `true`. |
+| `DEMO_PROJECT_ID`, `DEMO_SECRET` | Project ID and secret key from [xiomb.com/projects](https://xiomb.com/projects). |
+| `DEMO_HOST`, `DEMO_PORT`, `DEMO_SOCKET_PORT` | Host name of the demo for links and the browser, port of the page (`8443`) and of the SDK socket (`8444`). |
+| `DEMO_CERT`, `DEMO_KEY` | Paths to the TLS certificate and key, relative to `js/demo/`. |
+| `DEMO_LOGIN_FILE` | Where the demo keeps its logins (`logins.json`). |
+| `DEMO_STREAMLINK` | Path to [streamlink](https://streamlink.github.io), used to pull Twitch and YouTube pages. Optional. |
+| `DEMO_TWITCH_KEY`, `DEMO_YOUTUBE_KEY` | Stream keys for the restream presets. Optional. |
+
+Open `https://<DEMO_HOST>:<DEMO_PORT>/`. With the self-signed certificate open `https://<DEMO_HOST>:<DEMO_SOCKET_PORT>/` once as well and accept it, otherwise the browser does not connect to the socket. The first login with a new name registers it; the same login and password then work for the page, for HLS, RTSP(S), RTMP(S) links and for OBS.
+
+The server side of the demo is in two files: `server.mjs` creates the project and wires its hooks, events and requests, `helper.mjs` holds their implementation and the HTTP server of the page. The links on the page come from `project.getHlsURL()`, `getRtspURL()`, `getRtspsURL()`, `getRtmpURL()` and `getRtmpsURL()`.
+
+Load test with viewers on the streams that are live now (needs `ffmpeg` for RTSP and RTMP):
+
+```bash
+node js/demo/loadtest/viewers.mjs --login demo --password demo --transport hls --viewers 2
+```
+
+`--transport`: `hls`, `rtsp`, `rtsps`, `rtmp` or `rtmps`.
 
 ## License
 

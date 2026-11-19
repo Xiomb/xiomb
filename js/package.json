@@ -1,7 +1,7 @@
 {
   "name": "xiomb",
   "version": "0.1.4",
-  "description": "Server and browser SDK for xiomb, a cloud audio/video streaming server with WebRTC, HLS, RTSP, RTMP and VOD",
+  "description": "Server and browser SDK for xiomb, a cloud audio/video streaming server with WebRTC, HLS, RTSP, RTSPS, RTMP and RTMPS",
   "keywords": [
     "xiomb",
     "cloud",
@@ -14,8 +14,9 @@
     "webrtc",
     "hls",
     "rtsp",
+    "rtsps",
     "rtmp",
-    "vod",
+    "rtmps",
     "video-player",
     "sdk"
   ],
