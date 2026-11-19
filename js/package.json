@@ -1,0 +1,89 @@
+{
+  "name": "xiomb",
+  "version": "0.1.4",
+  "description": "Server and browser SDK for xiomb, a cloud audio/video streaming server with WebRTC, HLS, RTSP, RTMP and VOD",
+  "keywords": [
+    "xiomb",
+    "cloud",
+    "media-server",
+    "video-server",
+    "audio",
+    "video",
+    "streaming",
+    "live-streaming",
+    "webrtc",
+    "hls",
+    "rtsp",
+    "rtmp",
+    "vod",
+    "video-player",
+    "sdk"
+  ],
+  "author": "Xiomb <contact@xiomb.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/Xiomb/xiomb",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xiomb/xiomb.git",
+    "directory": "js"
+  },
+  "bugs": {
+    "url": "https://github.com/Xiomb/xiomb/issues"
+  },
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./sdk": "./sdk/xiomb.mjs",
+    "./sdk/*": "./sdk/*",
+    "./package.json": "./package.json"
+  },
+  "unpkg": "sdk/xiomb.min.js",
+  "jsdelivr": "sdk/xiomb.min.js",
+  "files": [
+    "/index.js",
+    "/src",
+    "/proto",
+    "sdk/README.md",
+    "sdk/xiomb.js",
+    "sdk/xiomb.min.js",
+    "sdk/xiomb.min.js.map",
+    "sdk/xiomb.mjs",
+    "sdk/xiomb.min.mjs",
+    "sdk/xiomb.min.mjs.map",
+    "sdk/xiombPlayer.css",
+    "sdk/xiombPlayer.min.css",
+    "sdk/xiombPlayer.min.css.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node sdk/build.mjs",
+    "proto": "node -e \"require('fs').cpSync('../proto', 'proto', {recursive: true})\"",
+    "prepack": "npm run proto",
+    "prepublishOnly": "npm run build",
+    "test": "node test/restart.mjs",
+    "demo": "node demo/server.mjs",
+    "demo:cert": "mkdir -p demo/ssl && openssl req -x509 -newkey rsa:2048 -nodes -days 825 -subj /CN=localhost -addext subjectAltName=DNS:localhost,IP:127.0.0.1 -keyout demo/ssl/demo.key -out demo/ssl/demo.crt"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.5",
+    "@grpc/proto-loader": "^0.8.1",
+    "xsocket": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@rollup/plugin-babel": "^7.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "acorn": "^8.19.0",
+    "babel-plugin-transform-async-to-promises": "^0.8.18",
+    "less": "^4.9.1",
+    "promise-polyfill": "^8.3.0",
+    "rollup": "^4.64.1",
+    "terser": "^5.51.2"
+  }
+}

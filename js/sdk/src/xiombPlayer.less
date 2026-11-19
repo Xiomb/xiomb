@@ -1,0 +1,432 @@
+  @xmp-accent: #ff3b5c;
+@xmp-live: #e5233d;
+@xmp-text: #fff;
+@xmp-muted: rgba(255, 255, 255, 0.65);
+@xmp-glass: rgba(18, 18, 24, 0.72);
+@xmp-glass-border: rgba(255, 255, 255, 0.12);
+
+.xiombPlayer_fullscreenVideo() {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
+
+.xiombPlayer {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  overflow: hidden;
+  background: #0d0d12;
+  color: @xmp-text;
+  font: 12px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border-radius: 8px;
+  -webkit-user-select: none;
+  user-select: none;
+  box-sizing: border-box;
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  .xiombPlayer_screen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: radial-gradient(circle at 50% 40%, #23232e 0%, #0d0d12 70%);
+  }
+
+  .xiombPlayer_video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+  }
+
+  &[data-publish="true"] .xiombPlayer_video {
+    object-fit: cover;
+  }
+
+  &:fullscreen .xiombPlayer_video {
+    .xiombPlayer_fullscreenVideo();
+  }
+
+  &:-webkit-full-screen .xiombPlayer_video {
+    .xiombPlayer_fullscreenVideo();
+  }
+
+  .xiombPlayer_top,
+  .xiombPlayer_bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    z-index: 2;
+    transition: opacity 0.2s ease;
+  }
+
+  .xiombPlayer_top {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+  }
+
+  .xiombPlayer_bar {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  }
+
+  .xiombPlayer_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 18px;
+    padding: 0 7px;
+    border-radius: 9px;
+    background: @xmp-glass;
+    border: 1px solid @xmp-glass-border;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &:before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: @xmp-muted;
+    }
+  }
+
+  .xiombPlayer_badgeLive {
+    display: none;
+  }
+
+  .xiombPlayer_title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    font-weight: 600;
+    color: @xmp-muted;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .xiombPlayer_button {
+    flex: 0 0 auto;
+    position: relative;
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+    border: none;
+    border-radius: 50%;
+    background: @xmp-glass;
+    color: @xmp-text;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+    }
+
+    .xiombPlayer_slash {
+      display: none;
+      stroke: @xmp-accent;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    &:active {
+      transform: scale(0.92);
+    }
+
+    &[data-off="true"] {
+      background: rgba(255, 59, 92, 0.25);
+
+      .xiombPlayer_slash {
+        display: inline;
+      }
+    }
+  }
+
+  .xiombPlayer_close {
+    width: 22px;
+    height: 22px;
+    padding: 4px;
+  }
+
+  .xiombPlayer_space {
+    flex: 1 1 auto;
+  }
+
+  .xiombPlayer_action {
+    flex: 0 0 auto;
+    height: 34px;
+    min-width: 84px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 17px;
+    pointer-events: auto;
+    background: @xmp-accent;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(255, 59, 92, 0.45);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      background: lighten(@xmp-accent, 6%);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &[data-active="true"] .xiombPlayer_action {
+    background: @xmp-glass;
+    border: 1px solid @xmp-glass-border;
+    box-shadow: none;
+  }
+
+  .xiombPlayer_center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: 90%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .xiombPlayer_spinner {
+    display: none;
+    width: 26px;
+    height: 26px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: xiombPlayer_spin 0.8s linear infinite;
+  }
+
+  .xiombPlayer_message {
+    display: none;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: @xmp-glass;
+    font-size: 11px;
+    white-space: normal;
+  }
+
+  &[data-message="true"] .xiombPlayer_message {
+    display: block;
+  }
+
+  &[data-status="failed"] .xiombPlayer_message {
+    background: rgba(229, 35, 61, 0.85);
+  }
+
+  &[data-status="capture"],
+  &[data-status="connect"],
+  &[data-status="reconnect"] {
+    .xiombPlayer_spinner {
+      display: block;
+    }
+  }
+
+  &[data-status="publish"],
+  &[data-status="play"] {
+    .xiombPlayer_badge {
+      background: @xmp-live;
+      border-color: @xmp-live;
+
+      &:before {
+        background: #fff;
+        animation: xiombPlayer_pulse 1.4s ease-in-out infinite;
+      }
+    }
+
+    .xiombPlayer_badgePreview {
+      display: none;
+    }
+
+    .xiombPlayer_badgeLive {
+      display: inline;
+    }
+  }
+
+  &[data-publish="false"] {
+    .xiombPlayer_badgePreview {
+      display: none;
+    }
+
+    .xiombPlayer_badgeLive {
+      display: inline;
+    }
+
+    .xiombPlayer_videoMute,
+    .xiombPlayer_settingsButton {
+      display: none;
+    }
+  }
+
+  &[data-publish="false"]:not([data-status="play"]) .xiombPlayer_badge {
+    display: none;
+  }
+
+  &[data-video="false"] .xiombPlayer_video,
+  &[data-video="false"] .xiombPlayer_fullscreen,
+  &[data-audio="false"] .xiombPlayer_mute,
+  &[data-audio="false"] .xiombPlayer_fieldAudio,
+  &[data-video="false"] .xiombPlayer_videoMute,
+  &[data-video="false"] .xiombPlayer_fieldVideo {
+    display: none;
+  }
+
+  &[data-stream="false"] {
+    .xiombPlayer_mute,
+    .xiombPlayer_videoMute {
+      display: none;
+    }
+  }
+
+  &[data-stream="false"]:not([data-status="failed"]) .xiombPlayer_settingsButton {
+    display: none;
+  }
+
+  .xiombPlayer_action {
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+  }
+
+  &[data-idle="true"] {
+    cursor: none;
+
+    .xiombPlayer_top,
+    .xiombPlayer_bar,
+    .xiombPlayer_action {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  .xiombPlayer_settings {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background: rgba(13, 13, 18, 0.92);
+    z-index: 3;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  }
+
+  &[data-settings="true"] .xiombPlayer_settings {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .xiombPlayer_settingsTitle {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: @xmp-muted;
+  }
+
+  .xiombPlayer_field {
+    display: block;
+
+    span {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 10px;
+      color: @xmp-muted;
+    }
+
+    select {
+      display: block;
+      width: 100%;
+      height: 24px;
+      padding: 0 6px;
+      border: 1px solid @xmp-glass-border;
+      border-radius: 5px;
+      background: #1d1d26;
+      color: #fff;
+      font-size: 11px;
+      outline: none;
+
+      &:disabled {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .xiombPlayer_settingsDone {
+    align-self: flex-end;
+    height: 24px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    color: #111;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  &:fullscreen {
+    border-radius: 0;
+  }
+}
+
+@keyframes xiombPlayer_spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes xiombPlayer_pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

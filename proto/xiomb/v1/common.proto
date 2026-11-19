@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package xiomb.v1;
+
+message Error {
+  uint32 code = 1;
+  string name = 2;
+  string message = 3;
+}
+
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_PUBLISH = 1;
+  DIRECTION_PLAY = 2;
+  DIRECTION_PUSH = 3;
+}
+
+// Состояние медиа-сессии
+enum MediaStatus {
+  MEDIA_STATUS_UNSPECIFIED = 0;
+  MEDIA_STATUS_CONNECT = 1;    // соединяется
+  MEDIA_STATUS_PUBLISH = 2;    // публикация идёт
+  MEDIA_STATUS_PLAY = 3;       // просмотр идёт
+  MEDIA_STATUS_RECONNECT = 4;  // связь прервалась
+  MEDIA_STATUS_STOP = 5;       // закрыта
+  MEDIA_STATUS_PUSH = 6;       // ретрансляция идёт
+}
+
+enum Transport {
+  TRANSPORT_UNSPECIFIED = 0;
+  TRANSPORT_WEBRTC = 1;
+  TRANSPORT_RTSP = 2;
+  TRANSPORT_FILE = 3;
+  TRANSPORT_PULL = 4;
+  TRANSPORT_HLS = 5;
+  TRANSPORT_RTMP = 6;
+  TRANSPORT_PUSH = 7;
+  // OBS и другие клиенты WHIP: WebRTC по HTTP в проект, без переподключения
+  TRANSPORT_WEBRTC_OBS = 8;
+}
+
+message SessionDescription {
+  string type = 1;   // "offer" | "answer"
+  string sdp = 2;
+}
+
+message IceCandidate {
+  uint32 sdp_mline_index = 1;
+  string candidate = 2;
+}
+
+message Signal {
+  string media_id = 1;
+  oneof body {
+    SessionDescription description = 2;
+    IceCandidate candidate = 3;
+  }
+}
+
+message Track {
+  string kind = 1;
+  string codec = 2;
+  uint32 width = 3;
+  uint32 height = 4;
+  double fps = 5;
+  uint64 bitrate_bps = 6;
+  uint64 packets_lost = 7;
+  bool live = 8;
+  // в видео B-кадры: зрителям WebRTC его перекодируют
+  bool reorders_frames = 9;
+}
+
+message TranscoderInfo {
+  string kind = 1;    // "video" | "audio"
+  string from = 2;
+  string to = 3;
+  uint64 bitrate_bps = 4;
+  double fps = 5;
+  uint32 viewers = 6;
+}
+
+message StreamInfo {
+  string media_id = 1;
+  string name = 2;
+  reserved 3;
+  Transport transport = 4;
+  string user_id = 5;
+  int64 created_unix_ms = 6;
+  repeated Track tracks = 7;
+  bool recording = 8;
+  uint32 viewers = 9;
+  repeated TranscoderInfo transcoders = 10;
+  string snapshot_url = 11;
+  repeated string recording_urls = 12;
+  string data = 13;                 // данные проекта
+  repeated ViewerInfo viewer_list = 14;
+}
+
+// Зритель потока
+message ViewerInfo {
+  string media_id = 1;
+  string user_id = 2;
+  string data = 3;
+  Transport transport = 4;
+  MediaStatus status = 5;
+  int64 created_unix_ms = 6;
+}
+
+message CloseMedia {
+  string media_id = 1;
+  Error reason = 2;
+}
+
+message MediaClosed {
+  string media_id = 1;
+  Error reason = 2;
+}
+
+message StreamEnded {
+  string media_id = 1;
+  string name = 2;
+  Error reason = 3;
+}
+
+// Видео ретрансляции. codec: auto | copy | H264; bitrate_kbps и keyframe_interval_ms — только при перекодировании
+message PushVideo {
+  string codec = 1;
+  uint32 bitrate_kbps = 2;
+  uint32 keyframe_interval_ms = 3;
+  bool disabled = 4;
+}
+
+// Звук ретрансляции. codec: auto | copy | AAC
+message PushAudio {
+  string codec = 1;
+  uint32 bitrate_kbps = 2;
+  bool disabled = 3;
+}

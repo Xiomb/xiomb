@@ -1,0 +1,275 @@
+syntax = "proto3";
+package xiomb.v1;
+import "xiomb/v1/common.proto";
+
+service ProjectService {
+  rpc Connect(stream ProjectMessage) returns (stream ProjectEvent);
+}
+
+message ProjectMessage {
+  string request_id = 1;
+  oneof body {
+    Publish publish = 10;
+    Play play = 11;
+    Signal signal = 12;
+    CloseMedia close_media = 13;
+    KillStream kill_stream = 14;
+    SetStreamRecording set_recording = 15;
+    Snapshot snapshot = 16;
+    ListStreams list_streams = 17;
+    Pull pull = 18;
+    AuthorizeResult authorize_result = 19;
+    Renegotiate renegotiate = 20;
+    ListMedia list_media = 21;
+    GetMediaStats get_media_stats = 22;
+    Push push = 23;
+    IssueTurn issue_turn = 24;
+  }
+}
+
+message ProjectEvent {
+  string request_id = 1;
+  oneof body {
+    Ready ready = 10;
+    Result result = 11;
+    Signal signal = 12;
+    Authorize authorize = 13;
+    StreamStarted stream_started = 14;
+    StreamEnded stream_ended = 15;
+    MediaClosed media_closed = 16;
+    MediaStatusChanged media_status = 17;
+    MediaOpened media_opened = 18;
+    MediaStatsList media_stats = 19;
+    MediaSnapshot media_snapshot = 20;
+  }
+}
+
+message Ready {
+  string core_id = 1;  // меняется при перезапуске ядра
+  string project_id = 2;
+  // вход HLS ядра для зрителей: <hls_url>/<проект>/<поток>?параметры; пусто — входа нет
+  string hls_url = 3;
+  // публичные входы облака для ссылок: <вход>/<проект>/<поток>?параметры; пусто — входа нет
+  Links links = 4;
+}
+
+message Links {
+  string hls = 1;
+  string rtsp = 2;
+  string rtsps = 3;
+  string rtmp = 4;
+  string rtmps = 5;
+}
+
+message Result {
+  Error error = 1;
+  reserved 12;
+  oneof payload {
+    MediaCreated media = 10;
+    StreamList streams = 11;
+    MediaList media_list = 13;
+    string snapshot_url = 14;
+    MediaStats media_stats = 15;
+    TurnServers turn = 16;
+  }
+}
+
+// Логин TURN для одного RTCPeerConnection; Result.turn. Передать в Publish, Play или Renegotiate
+message IssueTurn {
+  string client_id = 1;
+}
+
+// turn_urls пустой — TURN в облаке не настроен
+message TurnServers {
+  repeated string stun_urls = 1;
+  repeated string turn_urls = 2;
+  string username = 3;
+  string credential = 4;
+  uint32 ttl_seconds = 5;
+}
+
+message MediaCreated {
+  string media_id = 1;
+  string session_id = 2;
+  reserved 3;
+  // HLS: плейлист на ноде, отдать зрителю
+  string play_url = 4;
+}
+
+message StreamList {
+  repeated StreamInfo streams = 1;
+}
+
+message Publish {
+  string client_id = 1;
+  string user_id = 2;
+  string name = 3;
+  SessionDescription offer = 4;
+  string client_address = 5;
+  string data = 6;                  // данные проекта, до 4 КБ
+  string user_agent = 7;            // программа клиента
+  Transport transport = 8;          // TRANSPORT_WEBRTC (по умолчанию) | TRANSPORT_WEBRTC_OBS
+  string turn_username = 9;         // из IssueTurn: логин живёт, пока открыто медиа
+}
+
+message Play {
+  string client_id = 1;
+  string user_id = 2;
+  string name = 3;
+  SessionDescription offer = 4;
+  string client_address = 5;
+  repeated string preferred_codecs = 6;
+  string data = 7;
+  // чужой проект — только для admin-проекта
+  string project_id = 8;
+  // TRANSPORT_WEBRTC (по умолчанию) | TRANSPORT_HLS - без offer, в ответе play_url
+  Transport transport = 9;
+  string user_agent = 10;           // программа клиента
+  string turn_username = 11;
+}
+
+message KillStream {
+  string name = 1;
+  string reason = 2;
+}
+
+message SetStreamRecording {
+  string name = 1;
+  bool enabled = 2;
+  string project_id = 3;
+}
+
+message Snapshot {
+  string name = 1;
+  string project_id = 2;
+}
+
+message ListStreams {
+  string project_id = 1;
+}
+
+message Pull {
+  string name = 1;
+  string uri = 2;
+  string rtsp_transport = 3;
+  string data = 4;
+  // для file://: доиграв, начать сначала
+  bool loop = 5;
+}
+
+// Ретрансляция потока name на rtmp:// или rtmps://. Result.media
+message Push {
+  string name = 1;
+  string uri = 2;
+  PushVideo video = 3;
+  PushAudio audio = 4;
+  string data = 5;
+}
+
+message Authorize {
+  string user_id = 1;
+  string token = 2;
+  string name = 3;
+  Direction direction = 4;
+  Transport transport = 5;
+  string remote_address = 6;
+  // параметры из адреса; auth_login и auth_password — логин и пароль (из URL или Basic)
+  map<string, string> params = 7;
+  // программа клиента: User-Agent (HLS, RTSP) или flashVer (RTMP)
+  string user_agent = 8;
+}
+
+message AuthorizeResult {
+  Error error = 1;
+  string data = 2;
+  // ID пользователя от проекта; пусто — user_id из Authorize
+  string user_id = 3;
+}
+
+message StreamStarted {
+  StreamInfo stream = 1;
+}
+
+// Новый offer после MediaStatusChanged{renegotiate}. Result.media
+message Renegotiate {
+  string media_id = 1;
+  SessionDescription offer = 2;
+  repeated string preferred_codecs = 3;
+  string turn_username = 4;
+}
+
+// Смена статуса медиа; renegotiate — нужен Renegotiate
+message MediaStatusChanged {
+  string media_id = 1;
+  MediaStatus status = 2;
+  reserved 3;
+  bool renegotiate = 4;
+  Error reason = 5;
+}
+
+// Медиа проекта со статусами. Result.media_list
+message ListMedia {}
+
+message MediaState {
+  string media_id = 1;
+  string name = 2;
+  Direction direction = 3;
+  MediaStatus status = 4;
+  bool renegotiate = 5;
+  string snapshot_url = 6;
+  repeated string recording_urls = 7;
+  Transport transport = 8;
+  string user_id = 9;
+  string data = 10;
+  string play_url = 11;
+  // адрес и программа клиента, если известны
+  string client_address = 12;
+  string user_agent = 13;
+}
+
+message GetMediaStats {
+  string media_id = 1;
+}
+
+// Трек публикации (что приходит) или зрителя (что уходит)
+message TrackStats {
+  string kind = 1;
+  string codec = 2;
+  uint32 width = 3;
+  uint32 height = 4;
+  double fps = 5;
+  uint64 bitrate_bps = 6;
+  uint64 packets_lost = 7;
+  uint64 dropped = 8;
+  bool live = 9;
+  string transcoded_from = 10;
+}
+
+// Статистика медиа по последнему heartbeat ноды
+message MediaStats {
+  string media_id = 1;
+  int64 measured_unix_ms = 2;
+  repeated TrackStats tracks = 3;
+  repeated TranscoderInfo transcoders = 4;
+  bool recording = 5;
+  uint32 viewers = 6;
+}
+
+message MediaStatsList {
+  repeated MediaStats stats = 1;
+}
+
+// Новый снимок публикации
+message MediaSnapshot {
+  string media_id = 1;
+  string url = 2;
+}
+
+// Медиа, которую проект сам не создавал (RTSP)
+message MediaOpened {
+  MediaState media = 1;
+}
+
+message MediaList {
+  repeated MediaState media = 1;
+}
