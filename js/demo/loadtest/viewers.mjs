@@ -1,5 +1,5 @@
 // Нагрузка зрителями на потоки, которые сейчас в эфире.
-// node loadtest/viewers.mjs --login demo --password demo --transport hls --viewers 2 --match '^pull-'
+// npm run demo:load -- --login demo --password demo --transport hls --viewers 2 --match '^pull-'
 import {spawn} from "node:child_process";
 import {parseArgs} from "node:util";
 

@@ -68,6 +68,7 @@
     "prepublishOnly": "npm run build",
     "test": "node test/restart.mjs",
     "demo": "node demo/server.mjs",
+    "demo:load": "node demo/loadtest/viewers.mjs",
     "demo:cert": "mkdir -p demo/ssl && openssl req -x509 -newkey rsa:2048 -nodes -days 825 -subj /CN=localhost -addext subjectAltName=DNS:localhost,IP:127.0.0.1 -keyout demo/ssl/demo.key -out demo/ssl/demo.crt"
   },
   "dependencies": {

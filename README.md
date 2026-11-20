@@ -113,7 +113,7 @@ The server side of the demo is in two files: `server.mjs` creates the project an
 Load test with viewers on the streams that are live now (needs `ffmpeg` for RTSP and RTMP):
 
 ```bash
-node js/demo/loadtest/viewers.mjs --login demo --password demo --transport hls --viewers 2
+cd js && npm run demo:load -- --login demo --password demo --transport hls --viewers 2
 ```
 
 `--transport`: `hls`, `rtsp`, `rtsps`, `rtmp` or `rtmps`.
