@@ -1,9 +1,9 @@
-# xiomb
+# @xiomb/xiomb
 
 ```sh
-npm install xiomb
+npm install @xiomb/xiomb
 ```
 
 ```js
-import { Xiomb } from 'xiomb';
+import { Xiomb } from '@xiomb/xiomb';
 ```
