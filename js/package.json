@@ -1,0 +1,33 @@
+{
+  "name": "xiomb",
+  "version": "0.0.1",
+  "description": "Xiomb",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xiomb/xiomb.git",
+    "directory": "js"
+  },
+  "homepage": "https://github.com/Xiomb/xiomb/tree/main/js#readme",
+  "bugs": {
+    "url": "https://github.com/Xiomb/xiomb/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
