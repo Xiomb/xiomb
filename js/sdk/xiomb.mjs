@@ -900,6 +900,7 @@ class xiombRestart {
 
 const RENEGOTIATE_RETRY_MIN$1 = 1000;
 const RENEGOTIATE_RETRY_MAX$1 = 5000;
+const SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
 
 class xiombSession extends xiombEmitter {
     #xiomb;
@@ -1011,11 +1012,12 @@ class xiombSession extends xiombEmitter {
         }
         const capabilities = capabilitySource.getCapabilities('video');
         const codecList = capabilities && capabilities.codecs ? capabilities.codecs : [];
-        const preferredCodecList = codecList.filter(codec => wantedCodecList.indexOf(codec.mimeType.split('/')[1].toUpperCase()) !== -1);
+        const getName = codec => codec.mimeType.split('/')[1].toUpperCase();
+        const preferredCodecList = wantedCodecList.flatMap(name => codecList.filter(codec => getName(codec) === name));
         if (!preferredCodecList.length) {
             return;
         }
-        const orderedCodecList = [...preferredCodecList, ...codecList.filter(codec => preferredCodecList.indexOf(codec) === -1)];
+        const orderedCodecList = [...preferredCodecList, ...codecList.filter(codec => SERVICE_CODEC_LIST.indexOf(getName(codec)) !== -1)];
         for (const transceiver of peerConnection.getTransceivers()) {
             const track = transceiver.sender.track || transceiver.receiver.track;
             if (track && track.kind === 'video' && typeof transceiver.setCodecPreferences === 'function') {
@@ -3277,7 +3279,6 @@ const REQUEST_TTL = 20000;
 const EARLY_MESSAGE_TTL = 10000;
 const MEDIA_TYPE_LIST = ['media.signal', 'media.status', 'media.closed', 'media.stat'];
 const DEFAULT_STUN_URL = 'stun:stun.xiomb.com:3478';
-const SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
 const TRANSPORT_NAME_MAP = {webrtc: 'WebRTC', hls: 'HLS'};
 
 class xiomb extends xiombEmitter {

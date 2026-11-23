@@ -545,7 +545,7 @@ const viewer = client.play('room-7-alice', {
 | `textList` | — | Player texts, see [xiombPlayer](#player-xiombplayer). |
 | `constraints` | 720p30 + audio | `getUserMedia` constraints for a publisher. |
 | `transport` | `webrtc` | Viewer transport: `webrtc`, `hls` or a list in order of preference. Without WebRTC in the browser the SDK switches to HLS by itself. |
-| `codecList` | — | Preferred video codecs: `['H264']`, `['VP9', 'VP8']`. |
+| `codecList` | — | Allowed video codecs in order of preference: `['H264']`, `['VP9', 'VP8']`. Other codecs are removed from the offer. |
 | `custom` | — | Object (or `xiombObject => object`) passed to the `publish`/`play` hook. |
 
 **Methods**

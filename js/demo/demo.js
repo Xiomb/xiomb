@@ -250,16 +250,16 @@ function startApp(login, password) {
         }
     });
 
-    function play(name, transport) {
-        const mediaObject = xiomb.play(name, {transport, title: name});
-        tile('playTiles', mediaObject, `${name} · ${transport}`);
+    function play(name, transport, codec = '') {
+        const mediaObject = xiomb.play(name, {transport, title: name, ...(codec ? {codecList: [codec]} : {})});
+        tile('playTiles', mediaObject, `${name} · ${transport}${codec ? ` · ${codec}` : ''}`);
     }
 
     const showTab = paneID => bootstrap.Tab.getOrCreateInstance(document.querySelector(`[data-bs-target="#${paneID}"]`)).show();
 
     $('playStart').addEventListener('click', () => {
         const name = $('playName').value.trim();
-        if (name) play(name, $('playTransport').value);
+        if (name) play(name, $('playTransport').value, $('playCodec').value);
     });
 
     // ---------- мои потоки ----------

@@ -110,14 +110,23 @@
                             <input class="form-control" id="playName" list="streamNameList">
                             <datalist id="streamNameList"></datalist>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label small">Транспорт</label>
                             <select class="form-select" id="playTransport">
                                 <option value="webrtc">WebRTC</option>
                                 <option value="hls">HLS</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
+                            <label class="form-label small">Кодек видео</label>
+                            <select class="form-select" id="playCodec">
+                                <option value="">авто</option>
+                                <option value="H264">H264</option>
+                                <option value="VP8">VP8</option>
+                                <option value="VP9">VP9</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <button class="btn btn-primary w-100" id="playStart"><i class="bi bi-play-fill"></i> Смотреть</button>
                         </div>
                     </div>

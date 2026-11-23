@@ -2,7 +2,7 @@ import xSocket from "xsocket";
 import {xiombEmitter} from "./xiombEmitter.js";
 import {xiombError} from "./xiombError.js";
 import {xiombPlayer} from "./xiombPlayer.js";
-import {xiombSession} from "./xiombSession.js";
+import {xiombSession, SERVICE_CODEC_LIST} from "./xiombSession.js";
 import {xiombHlsSession} from "./xiombHlsSession.js";
 import {xiombObject} from "./xiombObject.js";
 
@@ -10,7 +10,6 @@ const REQUEST_TTL = 20000;
 const EARLY_MESSAGE_TTL = 10000;
 const MEDIA_TYPE_LIST = ['media.signal', 'media.status', 'media.closed', 'media.stat'];
 const DEFAULT_STUN_URL = 'stun:stun.xiomb.com:3478';
-const SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
 const TRANSPORT_NAME_MAP = {webrtc: 'WebRTC', hls: 'HLS'};
 
 export class xiomb extends xiombEmitter {

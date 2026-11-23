@@ -4,6 +4,7 @@ import {xiombRestart} from "./xiombRestart.js";
 
 const RENEGOTIATE_RETRY_MIN = 1000;
 const RENEGOTIATE_RETRY_MAX = 5000;
+export const SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
 
 export class xiombSession extends xiombEmitter {
     #xiomb;
@@ -115,11 +116,12 @@ export class xiombSession extends xiombEmitter {
         }
         const capabilities = capabilitySource.getCapabilities('video');
         const codecList = capabilities && capabilities.codecs ? capabilities.codecs : [];
-        const preferredCodecList = codecList.filter(codec => wantedCodecList.indexOf(codec.mimeType.split('/')[1].toUpperCase()) !== -1);
+        const getName = codec => codec.mimeType.split('/')[1].toUpperCase();
+        const preferredCodecList = wantedCodecList.flatMap(name => codecList.filter(codec => getName(codec) === name));
         if (!preferredCodecList.length) {
             return;
         }
-        const orderedCodecList = [...preferredCodecList, ...codecList.filter(codec => preferredCodecList.indexOf(codec) === -1)];
+        const orderedCodecList = [...preferredCodecList, ...codecList.filter(codec => SERVICE_CODEC_LIST.indexOf(getName(codec)) !== -1)];
         for (const transceiver of peerConnection.getTransceivers()) {
             const track = transceiver.sender.track || transceiver.receiver.track;
             if (track && track.kind === 'video' && typeof transceiver.setCodecPreferences === 'function') {

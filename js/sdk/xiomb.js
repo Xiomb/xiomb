@@ -2010,6 +2010,7 @@
   };
   var RENEGOTIATE_RETRY_MIN$1 = 1000;
   var RENEGOTIATE_RETRY_MAX$1 = 5000;
+  var SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
   var _xiomb$2 = /*#__PURE__*/_classPrivateFieldLooseKey("xiomb");
   var _direction = /*#__PURE__*/_classPrivateFieldLooseKey("direction");
   var _name$1 = /*#__PURE__*/_classPrivateFieldLooseKey("name");
@@ -2050,7 +2051,7 @@
   var _close$1 = /*#__PURE__*/_classPrivateFieldLooseKey("close");
   var _applySignal = /*#__PURE__*/_classPrivateFieldLooseKey("applySignal");
   var xiombSession = /*#__PURE__*/function (_xiombEmitter) {
-    function xiombSession(xiomb, direction, name, options) {
+    function xiombSession(xiomb, direction, _name2, options) {
       var _this;
       _this = _xiombEmitter.call(this) || this;
       Object.defineProperty(_this, _applySignal, {
@@ -2194,7 +2195,7 @@
       });
       _classPrivateFieldLooseBase(_this, _xiomb$2)[_xiomb$2] = xiomb;
       _classPrivateFieldLooseBase(_this, _direction)[_direction] = direction;
-      _classPrivateFieldLooseBase(_this, _name$1)[_name$1] = name;
+      _classPrivateFieldLooseBase(_this, _name$1)[_name$1] = _name2;
       _classPrivateFieldLooseBase(_this, _options$2)[_options$2] = options || {};
       _classPrivateFieldLooseBase(_this, _restart$1)[_restart$1] = new xiombRestart(direction === 'publish', _classPrivateFieldLooseBase(_this, _options$2)[_options$2]);
       _classPrivateFieldLooseBase(_this, _mediaStream)[_mediaStream] = direction === 'publish' ? _classPrivateFieldLooseBase(_this, _options$2)[_options$2].mediaStream : new MediaStream();
@@ -2409,14 +2410,19 @@
     }
     var capabilities = capabilitySource.getCapabilities('video');
     var codecList = capabilities && capabilities.codecs ? capabilities.codecs : [];
-    var preferredCodecList = codecList.filter(function (codec) {
-      return wantedCodecList.indexOf(codec.mimeType.split('/')[1].toUpperCase()) !== -1;
+    var getName = function getName(codec) {
+      return codec.mimeType.split('/')[1].toUpperCase();
+    };
+    var preferredCodecList = wantedCodecList.flatMap(function (name) {
+      return codecList.filter(function (codec) {
+        return getName(codec) === name;
+      });
     });
     if (!preferredCodecList.length) {
       return;
     }
     var orderedCodecList = [].concat(preferredCodecList, codecList.filter(function (codec) {
-      return preferredCodecList.indexOf(codec) === -1;
+      return SERVICE_CODEC_LIST.indexOf(getName(codec)) !== -1;
     }));
     for (var _iterator5 = _createForOfIteratorHelperLoose(peerConnection.getTransceivers()), _step5; !(_step5 = _iterator5()).done;) {
       var transceiver = _step5.value;
@@ -5108,7 +5114,6 @@
   var EARLY_MESSAGE_TTL = 10000;
   var MEDIA_TYPE_LIST = ['media.signal', 'media.status', 'media.closed', 'media.stat'];
   var DEFAULT_STUN_URL = 'stun:stun.xiomb.com:3478';
-  var SERVICE_CODEC_LIST = ['RTX', 'RED', 'ULPFEC', 'FLEXFEC-03', 'CN', 'TELEPHONE-EVENT'];
   var TRANSPORT_NAME_MAP = {
     webrtc: 'WebRTC',
     hls: 'HLS'
